@@ -164,3 +164,258 @@
 
 </body>
 </html>
+<!DOCTYPE html>
+<html lang="en" data-theme="light">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>NexLink – Smart Link App</title>
+
+  <!-- Tailwind + DaisyUI -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script src="https://cdn.jsdelivr.net/npm/daisyui@4.4.0/dist/full.min.js"></script>
+</head>
+
+<body class="bg-base-200 min-h-screen">
+
+  <!-- NAVBAR -->
+  <div class="navbar bg-base-100 shadow">
+    <div class="flex-1">
+      <a class="btn btn-ghost text-xl font-bold">NexLink</a>
+    </div>
+    <div class="flex-none gap-2">
+      <label class="swap swap-rotate">
+        <input type="checkbox" onclick="toggleTheme()" />
+        🌙
+      </label>
+
+      <label for="createLinkModal" class="btn btn-primary">
+        Create Link
+      </label>
+    </div>
+  </div>
+
+  <!-- MAIN CONTENT -->
+  <main class="p-4 max-w-3xl mx-auto">
+
+    <h1 class="text-2xl font-bold mb-4">Your Links</h1>
+
+    <!-- LINK CARD -->
+    <div class="card bg-base-100 shadow mb-4">
+      <div class="card-body">
+        <h2 class="card-title text-primary">nex.link/abc123</h2>
+        <p class="text-sm opacity-70">https://example.com</p>
+
+        <div class="card-actions justify-end">
+          <button class="btn btn-outline btn-sm" onclick="copyLink('https://example.com')">
+            Copy
+          </button>
+          <button class="btn btn-error btn-outline btn-sm">
+            Delete
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <!-- ANOTHER CARD -->
+    <div class="card bg-base-100 shadow">
+      <div class="card-body">
+        <h2 class="card-title text-primary">nex.link/xyz789</h2>
+        <p class="text-sm opacity-70">https://google.com</p>
+
+        <div class="card-actions justify-end">
+          <button class="btn btn-outline btn-sm" onclick="copyLink('https://google.com')">
+            Copy
+          </button>
+          <button class="btn btn-error btn-outline btn-sm">
+            Delete
+          </button>
+        </div>
+      </div>
+    </div>
+
+  </main>
+
+  <!-- CREATE LINK MODAL -->
+  <input type="checkbox" id="createLinkModal" class="modal-toggle" />
+  <div class="modal">
+    <div class="modal-box">
+      <h3 class="font-bold text-lg">Create New Link</h3>
+
+      <input
+        type="text"
+        placeholder="Paste long URL here"
+        class="input input-bordered w-full mt-4"
+      />
+
+      <div class="modal-action">
+        <label for="createLinkModal" class="btn btn-primary">
+          Create
+        </label>
+        <label for="createLinkModal" class="btn">
+          Cancel
+        </label>
+      </div>
+    </div>
+  </div>
+
+  <!-- TOAST -->
+  <div id="toast" class="toast toast-top toast-end hidden">
+    <div class="alert alert-success">
+      <span>Link copied!</span>
+    </div>
+  </div>
+
+  <!-- JAVASCRIPT -->
+  <script>
+    function copyLink(link) {
+      navigator.clipboard.writeText(link);
+      const toast = document.getElementById("toast");
+      toast.classList.remove("hidden");
+      setTimeout(() => {
+        toast.classList.add("hidden");
+      }, 2000);
+    }
+
+    function toggleTheme() {
+      const html = document.documentElement;
+      html.dataset.theme = html.dataset.theme === "dark" ? "light" : "dark";
+    }
+  </script>
+
+</body>
+</html><!DOCTYPE html>
+<html lang="en" data-theme="light">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>NexLink – Smart Link App</title>
+
+  <!-- Tailwind + DaisyUI -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script src="https://cdn.jsdelivr.net/npm/daisyui@4.4.0/dist/full.min.js"></script>
+
+  <!-- PWA -->
+  <link rel="manifest" href="manifest.json">
+  <meta name="theme-color" content="#2563eb">
+</head>
+
+<body class="bg-base-200 min-h-screen">
+
+  <!-- NAVBAR -->
+  <div class="navbar bg-base-100 shadow">
+    <div class="flex-1">
+      <a class="btn btn-ghost text-xl font-bold">NexLink</a>
+    </div>
+    <div class="flex-none gap-2">
+      <label class="swap swap-rotate">
+        <input type="checkbox" onclick="toggleTheme()" />
+        🌙
+      </label>
+      <label for="addModal" class="btn btn-primary">Create Link</label>
+    </div>
+  </div>
+
+  <!-- DASHBOARD -->
+  <main class="p-4 max-w-4xl mx-auto">
+    <h1 class="text-2xl font-bold mb-4">Your Links</h1>
+
+    <div id="links" class="space-y-4"></div>
+  </main>
+
+  <!-- ADD LINK MODAL -->
+  <input type="checkbox" id="addModal" class="modal-toggle" />
+  <div class="modal">
+    <div class="modal-box">
+      <h3 class="font-bold text-lg">Create New Link</h3>
+
+      <input id="urlInput" type="text"
+        placeholder="Paste long URL"
+        class="input input-bordered w-full mt-4" />
+
+      <div class="modal-action">
+        <button class="btn btn-primary" onclick="addLink()">Create</button>
+        <label for="addModal" class="btn">Cancel</label>
+      </div>
+    </div>
+  </div>
+
+  <!-- TOAST -->
+  <div id="toast" class="toast toast-top toast-end hidden">
+    <div class="alert alert-success">
+      <span>Copied!</span>
+    </div>
+  </div>
+
+  <!-- FIREBASE -->
+  <script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
+    import { getFirestore, collection, addDoc, onSnapshot, deleteDoc, doc } 
+      from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
+
+    const firebaseConfig = {
+      apiKey: "YOUR_API_KEY",
+      authDomain: "YOUR_PROJECT.firebaseapp.com",
+      projectId: "YOUR_PROJECT_ID",
+      storageBucket: "YOUR_PROJECT.appspot.com",
+      messagingSenderId: "ID",
+      appId: "APP_ID"
+    };
+
+    const app = initializeApp(firebaseConfig);
+    const db = getFirestore(app);
+    const linksRef = collection(db, "links");
+
+    window.addLink = async () => {
+      const url = document.getElementById("urlInput").value;
+      if (!url) return;
+      await addDoc(linksRef, { url });
+      document.getElementById("urlInput").value = "";
+      document.getElementById("addModal").checked = false;
+    };
+
+    onSnapshot(linksRef, snapshot => {
+      const container = document.getElementById("links");
+      container.innerHTML = "";
+      snapshot.forEach(docSnap => {
+        const data = docSnap.data();
+        container.innerHTML += `
+          <div class="card bg-base-100 shadow">
+            <div class="card-body">
+              <h2 ="card-title text-primary">${data.url}</h2>
+              <div class="card-actions justify-end">
+                <button class="btn btn-sm" onclick="copy('${data.url}')">Copy</button>
+                <button class="btn btn-sm btn-error"
+                  onclick="deleteLink('${docSnap.id}')">Delete</button>
+              </div>
+            </div>
+          </div>`;
+      });
+    });
+
+    window.deleteLink = async (id) => {
+      await deleteDoc(doc(db, "links", id));
+    };
+  </script>
+
+  <!-- APP JS -->
+  <script>
+    function copy(text) {
+      navigator.clipboard.writeText(text);
+      const toast = document.getElementById("toast");
+      toast.classList.remove("hidden");
+      setTimeout(() => toast.classList.add("hidden"), 1500);
+    }
+
+    function toggleTheme() {
+      const html = document.documentElement;
+      html.dataset.theme = html.dataset.theme === "dark" ? "light" : "dark";
+    }
+
+    if ("serviceWorker" in navigator) {
+      navigator.serviceWorker.register("sw.js");
+    }
+  </script>
+
+</body>
+  </html>
