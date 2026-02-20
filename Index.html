@@ -1,74 +1,166 @@
+
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta charset="UTF-8">
   <title>NexLink</title>
-
-  <script type="module">
-    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.14.1/firebase-app.js";
-    import { getAuth, GoogleAuthProvider, signInWithRedirect, getRedirectResult, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.14.1/firebase-auth.js";
-
-    const firebaseConfig = {
-      apiKey: "AIzaSyAHy5VoSosMX0TcdZ2J43YgGQzxb6d6B8Y",
-      authDomain: "nexlink-a0b9c.firebaseapp.com",
-      projectId: "nexlink-a0b9c",
-      appId: "1:472491790040:web:e86343d55852c275fd51ad"
-    };
-
-    const app = initializeApp(firebaseConfig);
-    const auth = getAuth(app);
-    const provider = new GoogleAuthProvider();
-
-    // Handle redirect result
-    getRedirectResult(auth)
-      .then((result) => {
-        if (result?.user) {
-          console.log("Signed in:", result.user.displayName);
-          document.getElementById("status").innerText =
-            "Welcome " + result.user.displayName;
-        }
-      })
-      .catch((error) => {
-        console.error(error);
-        alert(error.message);
-      });
-
-    // Button click
-    window.login = () => {
-      signInWithRedirect(auth, provider);
-    };
-
-    onAuthStateChanged(auth, (user) => {
-      if (user) {
-        document.getElementById("status").innerText =
-          "Logged in as " + user.displayName;
-      }
-    });
-  </script>
-
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;700&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet">
   <style>
+    :root {
+      --gold: #d4a843;
+      --gold2: #f0c866;
+      --dark: #080808;
+      --cream: #f0ebe0;
+      --cream2: #b8b0a0;
+    }
+    * { margin:0; padding:0; box-sizing:border-box; }
     body {
-      background:#000;
-      color:#fff;
-      font-family:Arial;
-      display:flex;
-      flex-direction:column;
-      justify-content:center;
-      align-items:center;
-      height:100vh;
+      background: var(--dark);
+      color: var(--cream);
+      font-family: 'DM Sans', sans-serif;
+      height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
     }
-    button {
-      padding:15px 25px;
-      font-size:16px;
-      cursor:pointer;
+    .setup { text-align: center; padding: 20px; }
+    .logo {
+      font-family: 'Playfair Display';
+      font-size: 64px;
+      background: linear-gradient(135deg, var(--gold), var(--gold2));
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
     }
+    .tagline {
+      font-size: 11px;
+      letter-spacing: 6px;
+      color: var(--cream2);
+      margin: 20px 0 40px;
+    }
+    .btn {
+      padding: 16px 32px;
+      border: none;
+      border-radius: 4px;
+      font-size: 14px;
+      font-weight: 600;
+      cursor: pointer;
+      background: linear-gradient(135deg, var(--gold), var(--gold2));
+      color: #000;
+      transition: opacity 0.3s;
+    }
+    .btn:hover { opacity: 0.85; }
+    .btn:disabled { opacity: 0.5; cursor: not-allowed; }
+    .status {
+      margin-top: 16px;
+      font-size: 12px;
+      letter-spacing: 2px;
+      color: var(--cream2);
+      min-height: 20px;
+    }
+    .error {
+      color: #e03535;
+      font-size: 12px;
+      margin-top: 12px;
+      letter-spacing: 1px;
+    }
+    .hidden { display: none; }
   </style>
 </head>
-
 <body>
-  <h1>NexLink</h1>
-  <button onclick="login()">Sign in with Google</button>
-  <p id="status"></p>
+
+<div class="setup" id="setup">
+  <div class="logo">NexLink</div>
+  <div class="tagline">CONNECT · LAUGH · KNOW · EARN</div>
+  <button class="btn" id="googleBtn">Sign in with Google</button>
+  <div class="status" id="status"></div>
+  <div class="error" id="errorMsg"></div>
+</div>
+
+<script type="module">
+  import { initializeApp } from "https://www.gstatic.com/firebasejs/10.14.1/firebase-app.js";
+  import {
+    getAuth,
+    GoogleAuthProvider,
+    signInWithPopup,
+    onAuthStateChanged
+  } from "https://www.gstatic.com/firebasejs/10.14.1/firebase-auth.js";
+  import {
+    getDatabase,
+    ref,
+    set
+  } from "https://www.gstatic.com/firebasejs/10.14.1/firebase-database.js";
+
+  const firebaseConfig = {
+    apiKey: "AIzaSyAHy5VoSosMX0TcdZ2J43YgGQzxb6d6B8Y",
+    authDomain: "nexlink-a0b9c.firebaseapp.com",
+    databaseURL: "https://nexlink-a0b9c-default-rtdb.firebaseio.com",
+    projectId: "nexlink-a0b9c",
+    storageBucket: "nexlink-a0b9c.appspot.com",
+    messagingSenderId: "472491790040",
+    appId: "1:472491790040:web:e86343d55852c275fd51ad"
+  };
+
+  const app = initializeApp(firebaseConfig);
+  const auth = getAuth(app);
+  const provider = new GoogleAuthProvider();
+  const db = getDatabase(app);
+
+  const setup = document.getElementById("setup");
+  const googleBtn = document.getElementById("googleBtn");
+  const statusEl = document.getElementById("status");
+  const errorMsg = document.getElementById("errorMsg");
+
+  googleBtn.addEventListener("click", async () => {
+    googleBtn.disabled = true;
+    statusEl.textContent = "Opening Google sign in...";
+    errorMsg.textContent = "";
+
+    try {
+      const result = await signInWithPopup(auth, provider);
+      const user = result.user;
+      statusEl.textContent = "Signing you in...";
+      await set(ref(db, "users/" + user.uid), {
+        uid: user.uid,
+        name: user.displayName,
+        email: user.email,
+        photo: user.photoURL,
+        lastLogin: new Date().toISOString()
+      });
+      statusEl.textContent = "Welcome to NexLink!";
+    } catch (error) {
+      googleBtn.disabled = false;
+      statusEl.textContent = "";
+      if (error.code === "auth/popup-blocked") {
+        errorMsg.textContent = "Popup blocked. Please allow popups and try again.";
+      } else if (error.code === "auth/popup-closed-by-user") {
+        errorMsg.textContent = "Sign in cancelled. Please try again.";
+      } else {
+        errorMsg.textContent = "Error: " + error.message;
+      }
+    }
+  });
+
+  onAuthStateChanged(auth, user => {
+    if (user) {
+      setup.classList.add("hidden");
+      document.body.innerHTML = `
+        <div style="text-align:center;padding:40px;font-family:'DM Sans',sans-serif;">
+          <div style="font-family:'Playfair Display';font-size:48px;background:linear-gradient(135deg,#d4a843,#f0c866);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;margin-bottom:8px;">NexLink</div>
+          <div style="font-size:12px;letter-spacing:3px;color:#b8b0a0;margin-bottom:24px;">CONNECT · LAUGH · KNOW · EARN</div>
+          <div style="font-size:16px;color:#f0ebe0;margin-bottom:8px;">Welcome, ${user.displayName}!</div>
+          <div style="font-size:12px;color:#b8b0a0;margin-bottom:32px;">${user.email}</div>
+          <div style="font-size:13px;color:#b8b0a0;">✅ Signed in successfully!</div>
+        </div>
+      `;
+    } else {
+      setup.classList.remove("hidden");
+      googleBtn.disabled = false;
+      statusEl.textContent = "";
+    }
+  });
+</script>
+
 </body>
 </html>
