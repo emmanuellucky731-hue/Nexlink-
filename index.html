@@ -164,3 +164,124 @@
 
 </body>
 </html>
+<!DOCTYPE html>
+<html lang="en" data-theme="light">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>NexLink – Smart Link App</title>
+
+  <!-- Tailwind + DaisyUI -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script src="https://cdn.jsdelivr.net/npm/daisyui@4.4.0/dist/full.min.js"></script>
+</head>
+
+<body class="bg-base-200 min-h-screen">
+
+  <!-- NAVBAR -->
+  <div class="navbar bg-base-100 shadow">
+    <div class="flex-1">
+      <a class="btn btn-ghost text-xl font-bold">NexLink</a>
+    </div>
+    <div class="flex-none gap-2">
+      <label class="swap swap-rotate">
+        <input type="checkbox" onclick="toggleTheme()" />
+        🌙
+      </label>
+
+      <label for="createLinkModal" class="btn btn-primary">
+        Create Link
+      </label>
+    </div>
+  </div>
+
+  <!-- MAIN CONTENT -->
+  <main class="p-4 max-w-3xl mx-auto">
+
+    <h1 class="text-2xl font-bold mb-4">Your Links</h1>
+
+    <!-- LINK CARD -->
+    <div class="card bg-base-100 shadow mb-4">
+      <div class="card-body">
+        <h2 class="card-title text-primary">nex.link/abc123</h2>
+        <p class="text-sm opacity-70">https://example.com</p>
+
+        <div class="card-actions justify-end">
+          <button class="btn btn-outline btn-sm" onclick="copyLink('https://example.com')">
+            Copy
+          </button>
+          <button class="btn btn-error btn-outline btn-sm">
+            Delete
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <!-- ANOTHER CARD -->
+    <div class="card bg-base-100 shadow">
+      <div class="card-body">
+        <h2 class="card-title text-primary">nex.link/xyz789</h2>
+        <p class="text-sm opacity-70">https://google.com</p>
+
+        <div class="card-actions justify-end">
+          <button class="btn btn-outline btn-sm" onclick="copyLink('https://google.com')">
+            Copy
+          </button>
+          <button class="btn btn-error btn-outline btn-sm">
+            Delete
+          </button>
+        </div>
+      </div>
+    </div>
+
+  </main>
+
+  <!-- CREATE LINK MODAL -->
+  <input type="checkbox" id="createLinkModal" class="modal-toggle" />
+  <div class="modal">
+    <div class="modal-box">
+      <h3 class="font-bold text-lg">Create New Link</h3>
+
+      <input
+        type="text"
+        placeholder="Paste long URL here"
+        class="input input-bordered w-full mt-4"
+      />
+
+      <div class="modal-action">
+        <label for="createLinkModal" class="btn btn-primary">
+          Create
+        </label>
+        <label for="createLinkModal" class="btn">
+          Cancel
+        </label>
+      </div>
+    </div>
+  </div>
+
+  <!-- TOAST -->
+  <div id="toast" class="toast toast-top toast-end hidden">
+    <div class="alert alert-success">
+      <span>Link copied!</span>
+    </div>
+  </div>
+
+  <!-- JAVASCRIPT -->
+  <script>
+    function copyLink(link) {
+      navigator.clipboard.writeText(link);
+      const toast = document.getElementById("toast");
+      toast.classList.remove("hidden");
+      setTimeout(() => {
+        toast.classList.add("hidden");
+      }, 2000);
+    }
+
+    function toggleTheme() {
+      const html = document.documentElement;
+      html.dataset.theme = html.dataset.theme === "dark" ? "light" : "dark";
+    }
+  </script>
+
+</body>
+</html>
