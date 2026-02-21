@@ -284,4 +284,18 @@
   </script>
 
 </body>
-</html>
+</html>// Load stories
+const storiesFeed = document.getElementById('stories-feed');
+onValue(ref(db, 'stories'), (snapshot) => {
+  storiesFeed.innerHTML = '';
+  snapshot.forEach((childSnapshot) => {
+    const story = childSnapshot.val();
+    const storyEl = document.createElement('div');
+    storyEl.className = 'story';
+    storyEl.innerHTML = `
+      <p><strong>${story.user}</strong>: ${story.text}</p>
+      <small>${new Date(story.timestamp).toLocaleString()}</small>
+    `;
+    storiesFeed.appendChild(storyEl);
+  });
+});
